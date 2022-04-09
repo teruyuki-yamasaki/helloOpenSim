@@ -6,6 +6,34 @@
 ```OsimModel```
 
 ```
+def __init__(self, model_path: str, visualize: bool, integrator_accuracy: float = 5e-5):
+        self.integrator_accuracy = integrator_accuracy
+        self.model = opensim.Model(model_path)
+        self.model_state = self.model.initSystem()
+        self.brain = opensim.PrescribedController()
+
+        # Enable the visualizer
+        #self.model.setUseVisualizer(visualize)
+        self.setVisualizer(visualize)
+
+        self.muscleSet = self.model.getMuscles()
+        self.forceSet = self.model.getForceSet()
+        self.bodySet = self.model.getBodySet()
+        self.jointSet = self.model.getJointSet()
+        self.markerSet = self.model.getMarkerSet()
+        self.contactGeometrySet = self.model.getContactGeometrySet()
+
+        if 1:
+            print(self.model)
+            print(self.model_state)
+            print(self.brain)
+            print(self.jointSet)
+            print(self.bodySet)
+            print(self.muscleSet) 
+            print(self.forceSet) 
+            print(self.markerSet) 
+            print(self.contactGeometrySet)
+>>>
 <opensim.simulation.Model; proxy of <Swig Object of type 'OpenSim::Model::Self *' at 0x7ff800185990> >
 <opensim.simbody.State; proxy of <Swig Object of type 'SimTK::State *' at 0x7ff821d41f30> >
 <opensim.simulation.PrescribedController; proxy of <Swig Object of type 'OpenSim::PrescribedController *' at 0x7ff821d413c0> >
