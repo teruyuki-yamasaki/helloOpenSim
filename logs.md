@@ -947,30 +947,175 @@ QQDot = state.getQDdot()
 def step 
 
 print(type(self.action_space.low),self.action_space.low, self.action_space.high)
-print(type(action), action)
-print(type(obs), obs)
+print(type(action), '\n', action)
+print(type(obs), '\n', obs)
 >>>
 <class 'numpy.ndarray'> [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.] [1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
-<class 'numpy.ndarray'> [ 0.00413123  0.07994726 -0.16216455 -0.04607999  0.08232494  0.0730328
-  0.08687268  0.0272981  -0.05092908  0.03892957 -0.0635344   0.0533768
- -0.06359456 -0.03302933 -0.04183635 -0.02465391  0.01505785  0.06269595
- -0.1276614  -0.0015887  -0.04135444  0.07447977]
-<class 'numpy.ndarray'> [ 0.93747147 -0.05721117 -0.08792119  0.19904211 -0.21679141  0.06266706
- -0.93554879 -0.75107262  0.21049691 -0.00709613  0.01480417  0.37075849
- -0.12553443  0.19457275  0.08385384 -0.06138439 -1.09341113  1.23030753
-  0.02274743  0.28200984  0.01200773  0.93254421  0.17594013  0.02410337
-  0.53899492 -0.79941971  0.03443997  1.17558031  0.34632871  0.00618581
-  0.96311379 -0.42104277  0.04863427  0.81908268 -0.62765546  0.09238774
-  0.83224747  0.65977681  0.07463238  0.753846   -0.0205098   0.06812417
-  1.23636874  0.00645049  0.04883654  1.23411403 -0.09157497  0.04142029
-  1.09483505 -0.16424105  0.01168769  0.9119258   0.13851644  0.02611666
- -0.03075301  0.66206734  0.12625431  0.19954548  0.08023527 -0.16383519
-  1.10779063  1.24020088 -0.03483316 -0.36224871  0.02090889  0.7998049
- -0.91972207  0.01155531  0.75710862  0.59371846  0.03577325  1.18089486
-  0.37223775  0.0058671   0.95023104 -0.47140572  0.00585651  0.90280969
- -0.45763613  0.01946859  0.84612733  0.28988432  0.06280299  0.75685069
-  0.02686714  0.05127171  1.23799634 -0.004996    0.0722097   1.27808857
-  0.16177716  0.03880758  1.19411557  0.22914364  0.06088889  0.80726278
- -0.25114367]
+<class 'numpy.ndarray'> 
+ [-0.00370436  0.07142249 -0.16246474 -0.04700485  0.0843166   0.07429423
+  0.07669357  0.02770165 -0.05358677  0.03590365 -0.05907931  0.0470061
+ -0.05459188 -0.03487457 -0.04760992 -0.03867698  0.01117676  0.06573399
+ -0.12547433 -0.0080709  -0.04682546  0.07824831]
+<class 'numpy.ndarray'> 
+ [ 0.93587857 -0.0233992  -0.05970407  0.16247211 -0.18390907  0.01356213
+ -0.75582761 -0.65763549  0.13373191 -0.00349877  0.01383712  0.44412194
+ -0.08487303  0.14971078  0.0829629  -0.06801524 -0.93862288  0.99919691
+ -0.00606388  0.01799421  0.01204322  0.92528406  0.18760738  0.02439866
+  0.56942938 -0.71548599  0.03144541  1.16287148  0.2843304   0.0068381
+  0.97812783 -0.32595608  0.05855261  0.84205603 -0.51884933  0.09350337
+  0.80641893  0.6082719   0.06780774  0.75502599  0.00615559  0.06610077
+  1.23647159 -0.00564864  0.05119995  1.23451914  0.08404537  0.04221221
+  1.09970753 -0.04336657  0.00906124  0.91068403 -0.0639747   0.02361565
+ -0.02531843  0.64727292  0.0851234   0.15430761  0.0813284  -0.14610409
+  0.94796337  1.02623215 -0.01370492 -0.5333403   0.02524286  0.83353398
+ -0.76460177  0.01085435  0.71852132  0.43073608  0.03244587  1.16708725
+  0.31812249  0.00627661  0.96782526 -0.40739551  0.00624714  0.92015633
+ -0.40037179  0.0154901   0.83744552  0.3208553   0.06674377  0.75587611
+  0.01664274  0.05136882  1.23814863 -0.00182587  0.06817847  1.27000529
+  0.24720647  0.03618474  1.18284197  0.3400871   0.06081923  0.81954442
+ -0.3698278 ]
 
+```
+
+```
+def update_footstep(self):
+        state_desc = self.get_state_desc()
+
+        # update contact
+        # True if GRF is smaller than - 5% of the body weight(body mass * g)
+        # Note that GRF is upward (-z direction) 
+        r_contact = True if state_desc['forces']['foot_r'][1] < -0.05*(self.MASS*self.G) else False
+        l_contact = True if state_desc['forces']['foot_l'][1] < -0.05*(self.MASS*self.G) else False
+
+        print(r_contact, state_desc['forces']['foot_r'][1]) 
+        # note that self.footstep['x_contact'] is prev_x_contact, x = r or l 
+
+        self.footstep['new'] = False
+        if (not self.footstep['r_contact'] and r_contact) \
+        or (not self.footstep['l_contact'] and l_contact):
+            self.footstep['new'] = True
+            self.footstep['n'] += 1
+
+        self.footstep['r_contact'] = r_contact
+        self.footstep['l_contact'] = l_contact
+>>>
+True -199.34087863760192
+```
+
+Can this be rewritten with jnp and @jax.jit? 
+Can this be bonehead? 
+```
+def get_observation_dict(self):
+        state_desc = self.get_state_desc()
+
+        obs_dict = {}
+
+ #       obs_dict['v_tgt_field'] = state_desc['v_tgt_field']
+
+        # pelvis state (in local frame)
+        obs_dict['pelvis'] = {}
+        obs_dict['pelvis']['height'] = state_desc['body_pos']['pelvis'][1]
+        obs_dict['pelvis']['pitch'] = -state_desc['joint_pos']['ground_pelvis'][0] # (+) pitching forward
+        obs_dict['pelvis']['roll'] = state_desc['joint_pos']['ground_pelvis'][1] # (+) rolling around the forward axis (to the right)
+        yaw = state_desc['joint_pos']['ground_pelvis'][2]
+        dx_local, dy_local = rotate_frame(  state_desc['body_vel']['pelvis'][0],
+                                            state_desc['body_vel']['pelvis'][2],
+                                            yaw)
+        dz_local = state_desc['body_vel']['pelvis'][1]
+        obs_dict['pelvis']['vel'] = [   dx_local, # (+) forward
+                                        -dy_local, # (+) leftward
+                                        dz_local, # (+) upward
+                                        -state_desc['joint_vel']['ground_pelvis'][0], # (+) pitch angular velocity
+                                        state_desc['joint_vel']['ground_pelvis'][1], # (+) roll angular velocity
+                                        state_desc['joint_vel']['ground_pelvis'][2]] # (+) yaw angular velocity
+
+        # leg state
+        for leg, side in zip(['r_leg', 'l_leg'], ['r', 'l']):
+            obs_dict[leg] = {}
+            grf = [ f/(self.MASS*self.G) for f in state_desc['forces']['foot_{}'.format(side)][0:3] ] # forces normalized by bodyweight
+            grm = [ m/(self.MASS*self.G) for m in state_desc['forces']['foot_{}'.format(side)][3:6] ] # forces normalized by bodyweight
+            grfx_local, grfy_local = rotate_frame(-grf[0], -grf[2], yaw)
+            if leg == 'r_leg':
+                obs_dict[leg]['ground_reaction_forces'] = [ grfx_local, # (+) forward
+                                                            grfy_local, # (+) lateral (rightward)
+                                                            -grf[1]] # (+) upward
+            if leg == 'l_leg':
+                obs_dict[leg]['ground_reaction_forces'] = [ grfx_local, # (+) forward
+                                                            -grfy_local, # (+) lateral (leftward)
+                                                            -grf[1]] # (+) upward
+
+            # joint angles
+            obs_dict[leg]['joint'] = {}
+            obs_dict[leg]['joint']['hip_abd'] = -state_desc['joint_pos']['hip_{}'.format(side)][1] # (+) hip abduction
+            obs_dict[leg]['joint']['hip'] = -state_desc['joint_pos']['hip_{}'.format(side)][0] # (+) extension
+            obs_dict[leg]['joint']['knee'] = state_desc['joint_pos']['knee_{}'.format(side)][0] # (+) extension
+            obs_dict[leg]['joint']['ankle'] = -state_desc['joint_pos']['ankle_{}'.format(side)][0] # (+) extension
+            # joint angular velocities
+            obs_dict[leg]['d_joint'] = {}
+            obs_dict[leg]['d_joint']['hip_abd'] = -state_desc['joint_vel']['hip_{}'.format(side)][1] # (+) hip abduction
+            obs_dict[leg]['d_joint']['hip'] = -state_desc['joint_vel']['hip_{}'.format(side)][0] # (+) extension
+            obs_dict[leg]['d_joint']['knee'] = state_desc['joint_vel']['knee_{}'.format(side)][0] # (+) extension
+            obs_dict[leg]['d_joint']['ankle'] = -state_desc['joint_vel']['ankle_{}'.format(side)][0] # (+) extension
+
+            # muscles
+            for MUS, mus in zip(    ['HAB', 'HAD', 'HFL', 'GLU', 'HAM', 'RF', 'VAS', 'BFSH', 'GAS', 'SOL', 'TA'],
+                                    ['abd', 'add', 'iliopsoas', 'glut_max', 'hamstrings', 'rect_fem', 'vasti', 'bifemsh', 'gastroc', 'soleus', 'tib_ant']):
+                obs_dict[leg][MUS] = {}
+                obs_dict[leg][MUS]['f'] = state_desc['muscles']['{}_{}'.format(mus,side)]['fiber_force']/self.Fmax[leg][MUS]
+                obs_dict[leg][MUS]['l'] = state_desc['muscles']['{}_{}'.format(mus,side)]['fiber_length']/self.lopt[leg][MUS]
+                obs_dict[leg][MUS]['v'] = state_desc['muscles']['{}_{}'.format(mus,side)]['fiber_velocity']/self.lopt[leg][MUS]
+
+        obs_new = np.zeros(97)
+        #obs_new = np.zeros(31)
+
+        offset = 44 #original
+        #offset = 11
+
+        obs_new[0]=state_desc['body_pos']['pelvis'][1]
+        obs_new[1]=-state_desc['joint_pos']['ground_pelvis'][0]
+        obs_new[2]=state_desc['joint_pos']['ground_pelvis'][1]
+        for i in range(6):
+            obs_new[3+i]=obs_dict['pelvis']['vel'][i]
+
+        for j in range(3):
+            obs_new[9+j]=obs_dict['r_leg']['ground_reaction_forces'][j]
+        for j in range(3):
+            obs_new[9+offset+j]=obs_dict['l_leg']['ground_reaction_forces'][j]
+        for i in range(2):
+            if i==0:
+                obs_new[12+offset *i]=obs_dict['r_leg']['joint']['hip_abd']
+                obs_new[13+offset *i]=obs_dict['r_leg']['joint']['hip']
+                obs_new[14+offset *i]=obs_dict['r_leg']['joint']['knee']
+                obs_new[15+offset *i]=obs_dict['r_leg']['joint']['ankle']
+
+            if i==1:
+                obs_new[12+offset *i]=obs_dict['l_leg']['joint']['hip_abd']
+                obs_new[13+offset *i]=obs_dict['l_leg']['joint']['hip']
+                obs_new[14+offset *i]=obs_dict['l_leg']['joint']['knee']
+                obs_new[15+offset *i]=obs_dict['l_leg']['joint']['ankle']
+
+        obs_new[16]=obs_dict['r_leg']['d_joint']['hip_abd']
+        obs_new[17]=obs_dict['r_leg']['d_joint']['hip']
+        obs_new[18]=obs_dict['r_leg']['d_joint']['knee']
+        obs_new[19]=obs_dict['r_leg']['d_joint']['ankle']
+
+        obs_new[16+offset]=obs_dict['l_leg']['d_joint']['hip_abd']
+        obs_new[17+offset]=obs_dict['l_leg']['d_joint']['hip']
+        obs_new[18+offset]=obs_dict['l_leg']['d_joint']['knee']
+        obs_new[19+offset]=obs_dict['l_leg']['d_joint']['ankle']
+
+        for arr, MUS, mus in zip([20,23,26,29,32,35,38,41,44,47,50],['HAB', 'HAD', 'HFL', 'GLU', 'HAM', 'RF', 'VAS', 'BFSH', 'GAS', 'SOL', 'TA'], ['abd', 'add', 'iliopsoas', 'glut_max', 'hamstrings', 'rect_fem', 'vasti', 'bifemsh', 'gastroc', 'soleus', 'tib_ant']):
+            obs_new[arr]=state_desc['muscles']['{}_r'.format(mus)]['fiber_force']/self.Fmax['r_leg'][MUS]
+        for arr, MUS, mus in zip([21,24,27,30,33,36,39,42,45,48,51],['HAB', 'HAD', 'HFL', 'GLU', 'HAM', 'RF', 'VAS', 'BFSH', 'GAS', 'SOL', 'TA'], ['abd', 'add', 'iliopsoas', 'glut_max', 'hamstrings', 'rect_fem', 'vasti', 'bifemsh', 'gastroc', 'soleus', 'tib_ant']):
+            obs_new[arr]=state_desc['muscles']['{}_r'.format(mus)]['fiber_length']/self.lopt['r_leg'][MUS]
+        for arr, MUS, mus in zip([22,25,28,31,34,37,40,43,46,49,52],['HAB', 'HAD', 'HFL', 'GLU', 'HAM', 'RF', 'VAS', 'BFSH', 'GAS', 'SOL', 'TA'], ['abd', 'add', 'iliopsoas', 'glut_max', 'hamstrings', 'rect_fem', 'vasti', 'bifemsh', 'gastroc', 'soleus', 'tib_ant']):
+            obs_new[arr]=state_desc['muscles']['{}_r'.format(mus)]['fiber_velocity']/self.lopt['r_leg'][MUS]
+        for arr, MUS, mus in zip([64,67,70,73,76,79,82,85,88,91,94],['HAB', 'HAD', 'HFL', 'GLU', 'HAM', 'RF', 'VAS', 'BFSH', 'GAS', 'SOL', 'TA'], ['abd', 'add', 'iliopsoas', 'glut_max', 'hamstrings', 'rect_fem', 'vasti', 'bifemsh', 'gastroc', 'soleus', 'tib_ant']):
+            obs_new[arr]=state_desc['muscles']['{}_l'.format(mus)]['fiber_force']/self.Fmax['l_leg'][MUS]
+        for arr, MUS, mus in zip([65,68,71,74,77,80,83,86,89,92,95],['HAB', 'HAD', 'HFL', 'GLU', 'HAM', 'RF', 'VAS', 'BFSH', 'GAS', 'SOL', 'TA'], ['abd', 'add', 'iliopsoas', 'glut_max', 'hamstrings', 'rect_fem', 'vasti', 'bifemsh', 'gastroc', 'soleus', 'tib_ant']):
+            obs_new[arr]=state_desc['muscles']['{}_l'.format(mus)]['fiber_length']/self.lopt['l_leg'][MUS]
+        for arr, MUS, mus in zip([66,69,72,75,78,81,84,87,90,93,96],['HAB', 'HAD', 'HFL', 'GLU', 'HAM', 'RF', 'VAS', 'BFSH', 'GAS', 'SOL', 'TA'], ['abd', 'add', 'iliopsoas', 'glut_max', 'hamstrings', 'rect_fem', 'vasti', 'bifemsh', 'gastroc', 'soleus', 'tib_ant']):
+            obs_new[arr]=state_desc['muscles']['{}_l'.format(mus)]['fiber_velocity']/self.lopt['l_leg'][MUS]
+
+        return obs_new
 ```
