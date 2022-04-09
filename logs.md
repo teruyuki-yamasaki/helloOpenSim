@@ -3,7 +3,20 @@
 
 ## 20220410 
 
-```in OsimModel```
+```OsimModel```
+
+```
+<opensim.simulation.Model; proxy of <Swig Object of type 'OpenSim::Model::Self *' at 0x7ff800185990> >
+<opensim.simbody.State; proxy of <Swig Object of type 'SimTK::State *' at 0x7ff821d41f30> >
+<opensim.simulation.PrescribedController; proxy of <Swig Object of type 'OpenSim::PrescribedController *' at 0x7ff821d413c0> >
+<opensim.simulation.JointSet; proxy of <Swig Object of type 'OpenSim::JointSet *' at 0x7ff821d41810> >
+<opensim.simulation.BodySet; proxy of <Swig Object of type 'OpenSim::BodySet *' at 0x7ff821d41840> >
+<opensim.simulation.SetMuscles; proxy of <Swig Object of type 'OpenSim::Set< Muscle > *' at 0x7ff821d416c0> >
+<opensim.simulation.ForceSet; proxy of <Swig Object of type 'OpenSim::ForceSet *' at 0x7ff821d41690> >
+<opensim.simulation.MarkerSet; proxy of <Swig Object of type 'OpenSim::MarkerSet *' at 0x7ff821d419c0> >
+<opensim.simulation.ContactGeometrySet; proxy of <Swig Object of type 'OpenSim::ContactGeometrySet *' at 0x7ff821d41990> >
+```
+
 ```
 if self.verbose:
   self.list_elements()
@@ -23,16 +36,7 @@ def list_elements(self):
           print(i,self.forceSet.get(i).getName())
       print("\nMARKERS")
       for i in range(self.markerSet.getSize()):
-          print(i,self.markerSet.get(i).getName())
-      
-     if 1:
-          print(self.jointSet)
-          print(self.bodySet)
-          print(self.muscleSet) 
-          print(self.forceSet) 
-          print(self.markerSet) 
-```
-  
+          print(i,self.markerSet.get(i).getName())  
 ```
 Updating Model file from 30000 to latest format...
 Loaded model gait14dof22musc from file /Users/yamasaki/LearnToMove/SimWalk/0410/myenvs/myopensim/./models/gait14dof22musc_20170320.osim
@@ -125,9 +129,4 @@ FORCES
 31 HipAddLimit_l
 
 MARKERS
-<opensim.simulation.JointSet; proxy of <Swig Object of type 'OpenSim::JointSet *' at 0x7fc688ea2810> >
-<opensim.simulation.BodySet; proxy of <Swig Object of type 'OpenSim::BodySet *' at 0x7fc688ea2840> >
-<opensim.simulation.SetMuscles; proxy of <Swig Object of type 'OpenSim::Set< Muscle > *' at 0x7fc688ea26c0> >
-<opensim.simulation.ForceSet; proxy of <Swig Object of type 'OpenSim::ForceSet *' at 0x7fc688ea2690> >
-<opensim.simulation.MarkerSet; proxy of <Swig Object of type 'OpenSim::MarkerSet *' at 0x7fc688ea29c0> >
 ```
