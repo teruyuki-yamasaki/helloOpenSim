@@ -65,7 +65,7 @@ def list_elements(self):
       print("\nMARKERS")
       for i in range(self.markerSet.getSize()):
           print(i,self.markerSet.get(i).getName())  
-```
+>>>
 Updating Model file from 30000 to latest format...
 Loaded model gait14dof22musc from file /Users/yamasaki/LearnToMove/SimWalk/0410/myenvs/myopensim/./models/gait14dof22musc_20170320.osim
 JOINTS
