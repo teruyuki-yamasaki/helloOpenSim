@@ -24,6 +24,13 @@ def list_elements(self):
       print("\nMARKERS")
       for i in range(self.markerSet.getSize()):
           print(i,self.markerSet.get(i).getName())
+      
+     if 1:
+          print(self.jointSet)
+          print(self.bodySet)
+          print(self.muscleSet) 
+          print(self.forceSet) 
+          print(self.markerSet) 
 ```
   
 ```
@@ -118,4 +125,9 @@ FORCES
 31 HipAddLimit_l
 
 MARKERS
+<opensim.simulation.JointSet; proxy of <Swig Object of type 'OpenSim::JointSet *' at 0x7fc688ea2810> >
+<opensim.simulation.BodySet; proxy of <Swig Object of type 'OpenSim::BodySet *' at 0x7fc688ea2840> >
+<opensim.simulation.SetMuscles; proxy of <Swig Object of type 'OpenSim::Set< Muscle > *' at 0x7fc688ea26c0> >
+<opensim.simulation.ForceSet; proxy of <Swig Object of type 'OpenSim::ForceSet *' at 0x7fc688ea2690> >
+<opensim.simulation.MarkerSet; proxy of <Swig Object of type 'OpenSim::MarkerSet *' at 0x7fc688ea29c0> >
 ```
