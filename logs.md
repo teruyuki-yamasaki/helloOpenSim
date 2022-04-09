@@ -1226,3 +1226,10 @@ def init_reward(self):
             return self.get_reward_walk() 
         return self.get_reward_1()
 ```
+
+```
+def rotate_frame(x, y, theta):
+    x_rot = np.cos(theta)*x - np.sin(theta)*y
+    y_rot = np.sin(theta)*x + np.cos(theta)*y
+    return x_rot, y_rot
+```
