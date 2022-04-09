@@ -2,6 +2,30 @@
 
 
 ## 20220410 
+
+```in OsimModel```
+```
+if self.verbose:
+  self.list_elements()
+ 
+def list_elements(self):
+      print("JOINTS")
+      for i in range(self.jointSet.getSize()):
+          print(i,self.jointSet.get(i).getName())
+      print("\nBODIES")
+      for i in range(self.bodySet.getSize()):
+          print(i,self.bodySet.get(i).getName())
+      print("\nMUSCLES")
+      for i in range(self.muscleSet.getSize()):
+          print(i,self.muscleSet.get(i).getName())
+      print("\nFORCES")
+      for i in range(self.forceSet.getSize()):
+          print(i,self.forceSet.get(i).getName())
+      print("\nMARKERS")
+      for i in range(self.markerSet.getSize()):
+          print(i,self.markerSet.get(i).getName())
+```
+  
 ```
 Updating Model file from 30000 to latest format...
 Loaded model gait14dof22musc from file /Users/yamasaki/LearnToMove/SimWalk/0410/myenvs/myopensim/./models/gait14dof22musc_20170320.osim
