@@ -715,3 +715,30 @@ def get_state(self):
 ```
 
 ## ```OsimEnv(gym.Env)```
+```
+def load_model(self, model_path: str = None):
+        if model_path:
+            self.model_path = model_path
+
+        self.osim_model = OsimModel(self.model_path, self.visualize, integrator_accuracy = self.integrator_accuracy)
+
+        # Create specs, action and observation spaces mocks for compatibility with OpenAI gym
+        self.spec = Spec()
+        self.spec.timestep_limit = self.time_limit
+
+        self.action_space = ( [0.0] * self.osim_model.get_action_space_size(), [1.0] * self.osim_model.get_action_space_size() )
+#        self.observation_space = ( [-math.pi*100] * self.get_observation_space_size(), [math.pi*100] * self.get_observation_space_s
+        self.observation_space = ( [0] * self.get_observation_space_size(), [0] * self.get_observation_space_size() )
+
+        self.action_space = convert_to_gym(self.action_space)
+        self.observation_space = convert_to_gym(self.observation_space)
+
+        print(self.action_space, type(self.action_space)) 
+        print(self.observation_space, type(self.observation_space))  
+        print(self.osim_model, type(self.osim_model))  
+>>>
+Box(0.0, 1.0, (22,), float32) <class 'gym.spaces.box.Box'>
+Box(0.0, 0.0, (97,), float32) <class 'gym.spaces.box.Box'>
+<myenvs.myopensim.osim_walk_jnp.OsimModel object at 0x7fd608e60940> <class 'myenvs.myopensim.osim_walk_jnp.OsimModel'>
+
+```
