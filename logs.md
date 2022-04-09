@@ -158,8 +158,9 @@ MARKERS
 ```
 
 ```
-def actuate(self, action: ndarray = None):
+def actuate(self, action: List[float]):
         print(action) 
+        print(type(action))
         if np.any(np.isnan(action)):
             raise ValueError("NaN passed in the activation vector. Values in [0,1] interval are required.")
 
@@ -180,6 +181,7 @@ def actuate(self, action: ndarray = None):
             func.setValue( float(action[j]) )
 >>>
 [-0.021650588, 0.03279727, 0.08674466, 0.022344228, -0.03991613, -0.118166156, 0.06201687, 0.06357261, -0.08350917, 0.048476465, -0.04380525, 0.07244628, -0.046596058, -0.02404085, -0.06307677, -0.068010494, -0.04055324, -0.0069804476, 0.023529068, -0.008696106, -0.06960048, 0.07269663]
+<class 'list'> 
 ...
 <opensim.common.FunctionSet; proxy of <Swig Object of type 'OpenSim::FunctionSet *' at 0x7f9e78383d20> >
 22
@@ -740,5 +742,235 @@ def load_model(self, model_path: str = None):
 Box(0.0, 1.0, (22,), float32) <class 'gym.spaces.box.Box'>
 Box(0.0, 0.0, (97,), float32) <class 'gym.spaces.box.Box'>
 <myenvs.myopensim.osim_walk_jnp.OsimModel object at 0x7fd608e60940> <class 'myenvs.myopensim.osim_walk_jnp.OsimModel'>
+
+```
+
+##```Model```
+```
+def __init__(self, 
+                visualize: bool=False, 
+                integrator_accuracy: float=5e-5, 
+                difficulty: int=4, 
+                seed: int=None, 
+                report: bool=None):
+        for x in [visualize, integrator_accuracy, difficulty, seed, report]: print(type(x))
+        #if difficulty not in [0, 1, 2, 3]: raise ValueError("difficulty level should be in [0, 1, 2, 3].")
+        self.model_paths = {}
+        #self.model_paths['3D'] = os.path.join(os.path.dirname(__file__), '../models/gait14dof22musc_20170320.osim') # original
+        #self.model_paths['2D'] = os.path.join(os.path.dirname(__file__), '../models/gait14dof22musc_planar_20170320.osim') #original
+        self.model_paths['3D'] = os.path.join(os.path.dirname(__file__), './models/gait14dof22musc_20170320.osim') # path chanaged
+        self.model_paths['2D'] = os.path.join(os.path.dirname(__file__), './models/gait14dof22musc_planar_20170320.osim') # path changed
+        self.model_path = self.model_paths[self.get_model_key()]
+        super(L2M2019Env, self).__init__(visualize=visualize, integrator_accuracy=integrator_accuracy)
+
+        self.Fmax = {}
+        self.lopt = {}
+        for leg, side in zip(['r_leg', 'l_leg'], ['r', 'l']):
+            self.Fmax[leg] = {}
+            self.lopt[leg] = {}
+            for MUS, mus in zip(    ['HAB', 'HAD', 'HFL', 'GLU', 'HAM', 'RF', 'VAS', 'BFSH', 'GAS', 'SOL', 'TA'],
+                                    ['abd', 'add', 'iliopsoas', 'glut_max', 'hamstrings', 'rect_fem', 'vasti', 'bifemsh', 'gastroc', 'soleus', 'tib_ant']):
+                muscle = self.osim_model.muscleSet.get('{}_{}'.format(mus,side))
+                Fmax = muscle.getMaxIsometricForce()
+                lopt = muscle.getOptimalFiberLength()
+                self.Fmax[leg][MUS] = muscle.getMaxIsometricForce()
+                self.lopt[leg][MUS] = muscle.getOptimalFiberLength()
+        
+        pprint(self.Fmax) 
+        pprint(self.lopt) 
+
+        self.set_difficulty(difficulty)
+
+        if report:
+            bufsize = 0
+            self.observations_file = open('%s-obs.csv' % (report,),'w', bufsize)
+            self.actions_file = open('%s-act.csv' % (report,),'w', bufsize)
+            self.get_headers()
+
+        # create target velocity field
+#        from envs.target import VTgtField
+#        self.vtgt = VTgtField(visualize=visualize, version=self.difficulty, dt=self.osim_model.stepsize, seed=seed)
+#        self.obs_vtgt_space = self.vtgt.vtgt_space
+>>>
+<class 'bool'>
+<class 'float'>
+<class 'int'>
+<class 'NoneType'>
+<class 'NoneType'>
+
+{'l_leg': {'BFSH': 557.11475409836,
+           'GAS': 4690.57377,
+           'GLU': 3337.583607,
+           'HAB': 4460.290481,
+           'HAD': 3931.8,
+           'HAM': 4105.465574,
+           'HFL': 2697.344262,
+           'RF': 2191.74098360656,
+           'SOL': 7924.996721,
+           'TA': 2116.818162,
+           'VAS': 9593.95082},
+ 'r_leg': {'BFSH': 557.11475409836,
+           'GAS': 4690.57377,
+           'GLU': 3337.583607,
+           'HAB': 4460.290481,
+           'HAD': 3931.8,
+           'HAM': 4105.465574,
+           'HFL': 2697.344262,
+           'RF': 2191.74098360656,
+           'SOL': 7924.996721,
+           'TA': 2116.818162,
+           'VAS': 9593.95082}}
+{'l_leg': {'BFSH': 0.11,
+           'GAS': 0.051,
+           'GLU': 0.157,
+           'HAB': 0.0845,
+           'HAD': 0.087,
+           'HAM': 0.069,
+           'HFL': 0.117,
+           'RF': 0.076,
+           'SOL': 0.044,
+           'TA': 0.068,
+           'VAS': 0.099},
+ 'r_leg': {'BFSH': 0.11,
+           'GAS': 0.051,
+           'GLU': 0.157,
+           'HAB': 0.0845,
+           'HAD': 0.087,
+           'HAM': 0.069,
+           'HFL': 0.117,
+           'RF': 0.076,
+           'SOL': 0.044,
+           'TA': 0.068,
+           'VAS': 0.099}}
+
+```
+
+avoid redundunt computation 
+```
+muscle = self.osim_model.muscleSet.get('{}_{}'.format(mus,side))
+                Fmax = muscle.getMaxIsometricForce()
+                lopt = muscle.getOptimalFiberLength()
+                #self.Fmax[leg][MUS] = muscle.getMaxIsometricForce()
+                #self.lopt[leg][MUS] = muscle.getOptimalFiberLength()
+                self.Fmax[leg][MUS] = Fmax
+                self.lopt[leg][MUS] = lopt
+```
+
+```
+def reset(self, project: bool=True, seed: int=None, init_pose: ndarray=None, obs_as_dict: bool=True):
+        self.t = 0
+        self.init_reward()
+#        self.vtgt.reset(version=self.difficulty, seed=seed)
+
+        self.footstep['n'] = 0
+        self.footstep['new'] = False
+        self.footstep['r_contact'] = 1
+        self.footstep['l_contact'] = 1
+
+
+        # initialize state
+        self.osim_model.state = self.osim_model.model.initializeState()
+
+        if init_pose is None:
+            init_pose = self.INIT_POSE
+        
+        state = self.osim_model.get_state()
+
+        #random_ang = np.random.uniform(low=-0.3, high=0.0)
+        random_ang = 0.
+        QQ = state.getQ()
+        QQDot = state.getQDot()
+        for i in range(17):
+            QQDot[i] = 0
+        QQ[3] = 0 # x: (+) forward
+        QQ[5] = 0 # z: (+) right
+        QQ[1] = 0*np.pi/180 # roll
+        QQ[2] = 0*np.pi/180 # yaw
+        QQDot[3] = init_pose[0] # forward speed
+        QQDot[5] = init_pose[1] # forward speed
+        QQ[4] = init_pose[2] # pelvis height
+        QQ[0] =-init_pose[3] + random_ang -0.05# trunk lean: (+) backward
+        QQ[7] = -init_pose[4] # right hip abduct
+        QQ[6] = -init_pose[5] - random_ang # right hip flex
+        QQ[13] = init_pose[6] + random_ang# right knee extend
+        QQ[15] = -init_pose[7] - random_ang# right ankle flex
+        QQ[10] = -init_pose[8] # left hip adduct
+        QQ[9] = -init_pose[9] - random_ang # left hip flex
+        QQ[14] = init_pose[10] + random_ang# left knee extend
+        QQ[16] = -init_pose[11] - random_ang# left ankle flex
+
+        state.setQ(QQ)
+        state.setU(QQDot)
+        self.osim_model.set_state(state)
+        self.osim_model.model.equilibrateMuscles(self.osim_model.state)
+
+        self.osim_model.state.setTime(0)
+        self.osim_model.istep = 0
+
+        self.osim_model.reset_manager()
+
+        d = super(L2M2019Env, self).get_state_desc()
+        pose = np.array([d['body_pos']['pelvis'][0], -d['body_pos']['pelvis'][2], d['joint_pos']['ground_pelvis'][2]])
+#        self.v_tgt_field, self.flag_new_v_tgt_field = self.vtgt.update(pose)
+
+        if not project:
+            return self.get_state_desc()
+        if obs_as_dict:
+            return self.get_observation_dict()
+        return self.get_observation()
+>>>
+def reset(...):
+
+init_pose 
+<class 'numpy.ndarray'>
+[0.   0.   0.94 0.   0.   0.   0.   0.   0.   0.   0.   0.  ]
+
+state
+<class 'opensim.simbody.State'>
+<opensim.simbody.State; proxy of <Swig Object of type 'SimTK::State *' at 0x7ff4d9392540> >
+
+QQ = state.getQ()
+<class 'opensim.simbody.Vector'>
+~[0 0 0 0 0.94 0 0 0 0 0 0 0 -0.0872665 0 0 0 0]
+<class 'opensim.simbody.Vector'>
+~[-0.05 0 0 0 0.94 0 -0 -0 0 -0 -0 0 -0.0872665 0 0 -0 -0]
+
+
+QQDot = state.getQDdot() 
+<class 'opensim.simbody.Vector'>
+~[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+<class 'opensim.simbody.Vector'>
+~[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+```
+
+```
+def step 
+
+print(type(self.action_space.low),self.action_space.low, self.action_space.high)
+print(type(action), action)
+print(type(obs), obs)
+>>>
+<class 'numpy.ndarray'> [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.] [1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
+<class 'numpy.ndarray'> [ 0.00413123  0.07994726 -0.16216455 -0.04607999  0.08232494  0.0730328
+  0.08687268  0.0272981  -0.05092908  0.03892957 -0.0635344   0.0533768
+ -0.06359456 -0.03302933 -0.04183635 -0.02465391  0.01505785  0.06269595
+ -0.1276614  -0.0015887  -0.04135444  0.07447977]
+<class 'numpy.ndarray'> [ 0.93747147 -0.05721117 -0.08792119  0.19904211 -0.21679141  0.06266706
+ -0.93554879 -0.75107262  0.21049691 -0.00709613  0.01480417  0.37075849
+ -0.12553443  0.19457275  0.08385384 -0.06138439 -1.09341113  1.23030753
+  0.02274743  0.28200984  0.01200773  0.93254421  0.17594013  0.02410337
+  0.53899492 -0.79941971  0.03443997  1.17558031  0.34632871  0.00618581
+  0.96311379 -0.42104277  0.04863427  0.81908268 -0.62765546  0.09238774
+  0.83224747  0.65977681  0.07463238  0.753846   -0.0205098   0.06812417
+  1.23636874  0.00645049  0.04883654  1.23411403 -0.09157497  0.04142029
+  1.09483505 -0.16424105  0.01168769  0.9119258   0.13851644  0.02611666
+ -0.03075301  0.66206734  0.12625431  0.19954548  0.08023527 -0.16383519
+  1.10779063  1.24020088 -0.03483316 -0.36224871  0.02090889  0.7998049
+ -0.91972207  0.01155531  0.75710862  0.59371846  0.03577325  1.18089486
+  0.37223775  0.0058671   0.95023104 -0.47140572  0.00585651  0.90280969
+ -0.45763613  0.01946859  0.84612733  0.28988432  0.06280299  0.75685069
+  0.02686714  0.05127171  1.23799634 -0.004996    0.0722097   1.27808857
+  0.16177716  0.03880758  1.19411557  0.22914364  0.06088889  0.80726278
+ -0.25114367]
 
 ```
