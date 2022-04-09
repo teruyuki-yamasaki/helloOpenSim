@@ -1002,7 +1002,7 @@ def update_footstep(self):
 True -199.34087863760192
 ```
 
-Can this be rewritten with jnp and @jax.jit? 
+Can this be rewritten with jnp, jax.jit, jax.map_tree?  
 Can this be bonehead? 
 ```
 def get_observation_dict(self):
@@ -1118,4 +1118,111 @@ def get_observation_dict(self):
             obs_new[arr]=state_desc['muscles']['{}_l'.format(mus)]['fiber_velocity']/self.lopt['l_leg'][MUS]
 
         return obs_new
+```
+
+```
+## Values in the observation vector
+    # 'vtgt_field': vtgt vectors in body frame (2*11*11 = 242 values)
+    # 'pelvis': height, pitch, roll, 6 vel (9 values)
+    # for each 'r_leg' and 'l_leg' (*2)
+    #   'ground_reaction_forces' (3 values)
+    #   'joint' (4 values)
+    #   'd_joint' (4 values)
+    #   for each of the eleven muscles (*11)
+    #       normalized 'f', 'l', 'v' (3 values)
+    # 242 + 9 + 2*(3 + 4 + 4 + 11*3) = 339
+    def get_observation(self):
+        obs_dict = self.get_observation_dict()
+
+        # Augmented environment from the L2R challenge
+        res = []
+
+        # target velocity field (in body frame)
+        v_tgt = np.ndarray.flatten(obs_dict['v_tgt_field'])
+        res += v_tgt.tolist()
+
+        res.append(obs_dict['pelvis']['height'])
+        res.append(obs_dict['pelvis']['pitch'])
+        res.append(obs_dict['pelvis']['roll'])
+        res.append(obs_dict['pelvis']['vel'][0]/self.LENGTH0)
+        res.append(obs_dict['pelvis']['vel'][1]/self.LENGTH0)
+        res.append(obs_dict['pelvis']['vel'][2]/self.LENGTH0)
+        res.append(obs_dict['pelvis']['vel'][3])
+        res.append(obs_dict['pelvis']['vel'][4])
+        res.append(obs_dict['pelvis']['vel'][5])
+
+        for leg in ['r_leg', 'l_leg']:
+            res += obs_dict[leg]['ground_reaction_forces']
+            res.append(obs_dict[leg]['joint']['hip_abd'])
+            res.append(obs_dict[leg]['joint']['hip'])
+            res.append(obs_dict[leg]['joint']['knee'])
+            res.append(obs_dict[leg]['joint']['ankle'])
+            res.append(obs_dict[leg]['d_joint']['hip_abd'])
+            res.append(obs_dict[leg]['d_joint']['hip'])
+            res.append(obs_dict[leg]['d_joint']['knee'])
+            res.append(obs_dict[leg]['d_joint']['ankle'])
+            for MUS in ['HAB', 'HAD', 'HFL', 'GLU', 'HAM', 'RF', 'VAS', 'BFSH', 'GAS', 'SOL', 'TA']:
+                res.append(obs_dict[leg][MUS]['f'])
+                res.append(obs_dict[leg][MUS]['l'])
+                res.append(obs_dict[leg][MUS]['v'])
+        return res
+
+    def get_observation_clipped(self):
+        obs = self.get_observation()
+        return np.clip(obs, self.observation_space.low, self.observation_space.high)
+
+    def get_observation_space_size(self):
+        #return 339
+        return 97
+        #return 31
+
+    def get_state_desc(self):
+        d = super(L2M2019Env, self).get_state_desc()
+        #state_desc['joint_pos']
+        #state_desc['joint_vel']
+        #state_desc['joint_acc']
+        #state_desc['body_pos']
+        #state_desc['body_vel']
+        #state_desc['body_acc']
+        #state_desc['body_pos_rot']
+        #state_desc['body_vel_rot']
+        #state_desc['body_acc_rot']
+        #state_desc['forces']
+        #state_desc['muscles']
+        #state_desc['markers']
+        #state_desc['misc']
+#        if self.difficulty in [0, 1, 2, 3]:
+#            d['v_tgt_field'] = self.v_tgt_field # shape: (2, 11, 11)
+#        else:
+#            raise ValueError("difficulty level should be in [0, 1, 2, 3].")
+        return d
+```
+
+```
+def init_reward(self):
+        self.init_reward_1()
+
+    def init_reward_1(self):
+        self.d_reward = {}
+
+        self.d_reward['weight'] = {}
+        self.d_reward['weight']['footstep'] = 10
+        self.d_reward['weight']['effort'] = 1
+        self.d_reward['weight']['v_tgt'] = 1
+        self.d_reward['weight']['v_tgt_R2'] = 3
+
+        self.d_reward['alive'] = 0.1
+        self.d_reward['effort'] = 0
+
+        self.d_reward['footstep'] = {}
+        self.d_reward['footstep']['effort'] = 0
+        self.d_reward['footstep']['del_t'] = 0
+        self.d_reward['footstep']['del_v'] = 0
+
+    def get_reward(self):
+        if self.difficulty == 3: # Round 2
+            return self.get_reward_2()
+        if self.difficulty == 4:
+            return self.get_reward_walk() 
+        return self.get_reward_1()
 ```
