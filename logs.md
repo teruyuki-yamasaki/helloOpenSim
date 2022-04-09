@@ -158,3 +158,37 @@ FORCES
 
 MARKERS
 ```
+
+```
+def actuate(self, action: ndarray = None):
+        print(action) 
+        if np.any(np.isnan(action)):
+            raise ValueError("NaN passed in the activation vector. Values in [0,1] interval are required.")
+
+        action = np.clip(np.array(action), 0.0, 1.0)
+        self.last_action = action
+
+        brain = opensim.PrescribedController.safeDownCast(self.model.getControllerSet().get(0))
+        functionSet = brain.get_ControlFunctions()
+
+        print(functionSet)
+        print(functionSet.getSize())
+
+        for j in range(functionSet.getSize()):
+            func = opensim.Constant.safeDownCast(functionSet.get(j))
+            print(functionSet.get(j))
+            print(functionSet.get(j).getName())
+            print(func)
+            func.setValue( float(action[j]) )
+>>>
+[-0.021650588, 0.03279727, 0.08674466, 0.022344228, -0.03991613, -0.118166156, 0.06201687, 0.06357261, -0.08350917, 0.048476465, -0.04380525, 0.07244628, -0.046596058, -0.02404085, -0.06307677, -0.068010494, -0.04055324, -0.0069804476, 0.023529068, -0.008696106, -0.06960048, 0.07269663]
+...
+<opensim.common.FunctionSet; proxy of <Swig Object of type 'OpenSim::FunctionSet *' at 0x7f9e78383d20> >
+22
+<opensim.common.Function; proxy of <Swig Object of type 'OpenSim::Function *' at 0x7f9e78383ed0> >
+<opensim.common.Constant; proxy of <Swig Object of type 'OpenSim::Constant *' at 0x7f9e78383630> >
+<opensim.common.Function; proxy of <Swig Object of type 'OpenSim::Function *' at 0x7f9e78383630> >
+<opensim.common.Constant; proxy of <Swig Object of type 'OpenSim::Constant *' at 0x7f9e783835a0> >
+<opensim.common.Function; proxy of <Swig Object of type 'OpenSim::Function *' at 0x7f9e783835a0> >
+...
+```
