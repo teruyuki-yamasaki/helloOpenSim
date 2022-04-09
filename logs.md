@@ -1,9 +1,7 @@
 # logs 
 
 
-## 20220410 
-
-```OsimModel```
+## ```OsimModel```
 
 ```
 def __init__(self, model_path: str, visualize: bool, integrator_accuracy: float = 5e-5):
@@ -694,3 +692,26 @@ pprint(res)
                          'fiber_velocity': 0.0036406880749072904}}}
 
 ```
+
+```
+def reset_manager(self):
+        self.manager = opensim.Manager(self.model)
+        print(self.manager)
+        self.manager.setIntegratorAccuracy(self.integrator_accuracy)
+        self.manager.initialize(self.state)
+>>>
+<opensim.simulation.Manager; proxy of <Swig Object of type 'OpenSim::Manager *' at 0x7fe47010c5d0> >
+```
+
+
+```
+def get_state(self):
+        print(self.state) 
+        print(opensim.State(self.state))
+        return opensim.State(self.state)
+>>>
+<opensim.simbody.State; proxy of <Swig Object of type 'SimTK::State *' at 0x7f86985cc540> >
+<opensim.simbody.State; proxy of <Swig Object of type 'SimTK::State *' at 0x7f86985cc390> >
+```
+
+## ```OsimEnv(gym.Env)```
