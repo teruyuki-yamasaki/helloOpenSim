@@ -1,5 +1,9 @@
 # logs 
 
+to avoid the 'yellow' user warning "WARN: Box bound precision lowered by casting to float32"
+```
+gym.logger.set_level(40)
+```
 
 ## ```OsimModel```
 
