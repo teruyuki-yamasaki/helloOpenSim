@@ -44,6 +44,19 @@ print('OpenSim Version Installed is version:',osim.__version__)
 print(f'The execution time of OpenSim Package Installation is {(time.time() - start_time)} sec')
 ```
 
+```
+#@title Step 2: Let's import dataset from 5 GitHub URLs
+# OpenSim models etc from github
+ 
+!git clone https://github.com/opensim-org/opensim-models.git # models needed
+!git clone https://github.com/HernandezVincent/OpenSim.git  # models needed
+!cp /content/opensim-models/Models/Gait2354_Simbody/* /content/opensim-models/Pipelines/Gait2354_Simbody
+!git clone https://github.com/ESJiang/2354_xml.git
+!cp -rf /content/2354_xml/* /content/opensim-models/Pipelines/Gait2354_Simbody
+!git clone https://github.com/ESJiang/2354_result.git
+!git clone https://github.com/ESJiang/testc3d.git
+```
+
 ## logs 
 - [20220410 osim_walk_jnp.py]()
 
